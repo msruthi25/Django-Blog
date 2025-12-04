@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Home - My Blog{% endblock %}
+
+{% block content %}
+<h1 class="page-title">All Blog Posts</h1>
+
+<div class="container">
+    <div class="card-container">
+        {% if posts %}
+            {% for post in posts %}
+            <a href="{% url 'postDetail' post.id %}" class="card-link">
+                <div class="card">
+                    {% if post.image_url %}
+                    <!-- <img class="card-img" src="{{ post.image_url }}" alt="{{ post.title }}" loading="lazy"> -->
+                    {% endif %}
+                    <div class="card-content">
+                        <h2 class="card-title">{{ post.title }}</h2>
+                        <p class="card-text">{{ post.content|truncatewords:20 }}</p>
+                        <small class="card-date">Published on {{ post.created_at|slice:":10" }} at {{ post.created_at|slice:"11:16" }}</small>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        {% else %}
+            <p>No posts found.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ post_detail.title }} | My Blog{% endblock %}
+
+{% block content %}
+
+<div class="post-detail-container">
+
+    {% if post_detail.image_url %}
+    <div class="post-image">
+        <img src="{{ post_detail.image_url }}" alt="{{ post_detail.title }}">
+    </div>
+    {% endif %}
+
+    <div class="post-content">
+        <h1>{{ post_detail.title }}</h1>
+        <div class="post-meta">
+            <span>By {{ author_name }}</span> |
+            <span>{{ post_detail.created_at|slice:":10" }} at {{ post_detail.created_at|slice:"11:16" }}</span>
+        </div>
+        <div class="post-text">{{ post_detail.content|linebreaks }}</div>
+    </div>
+
+</div>
+
+<hr class="my-4">
+
+<!-- Section 1: Add a comment (POST) -->
+<div class="container" style="max-width:700px;">
+    <h4>Leave a comment</h4>
+
+    {% if request.COOKIES.access_token %}
+        <form method="POST" action="{% url 'createComment' post_detail.id %}">
+            {% csrf_token %}
+            <div class="mb-3">
+                <textarea name="content" class="form-control rounded" rows="3" placeholder="Write your comment..." required></textarea>
+            </div>
+            <button type="submit" class="btn btn-dark rounded-pill">Submit Comment</button>
+        </form>
+    {% else %}
+        <div class="alert alert-warning">
+            You must be logged in to comment.
+           
+        </div>
+    {% endif %}
+</div>
+
+<hr class="my-4">
+<div class="container mt-4" style="max-width:700px;">
+    <h4>Comments</h4>
+
+    {% if comments %}
+        {% for comment in comments %}
+        <div class="card mb-3 shadow-sm">
+            <div class="card-body">
+                <!-- Top row: username + created_at -->
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <strong>{{ comment.author.username }}</strong>
+                    <small class="text-muted">{{ comment.created_at|date:"M d, Y h:i A" }}</small>
+                </div>
+                <!-- Comment content -->
+                <p class="mb-0">{{ comment.content }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-info text-center mt-3">
+            No comments yet — be the first to comment!
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

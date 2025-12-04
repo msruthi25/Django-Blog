@@ -4,10 +4,10 @@ from datetime import datetime
 
 class Post(models.Model):
     id = models.AutoField(primary_key=True)
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255,unique=True)
     content = models.TextField(null=False, blank=False)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)   # FIXED
+    created_at = models.DateTimeField(auto_now_add=True) 
     image_url = models.TextField(blank=True)
     published = models.BooleanField(default=True)
 

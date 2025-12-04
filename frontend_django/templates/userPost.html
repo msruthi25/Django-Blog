@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1 class="page-title">Your Posts</h1>
+
+<div class="container">
+    <div class="card-container">
+        {% if posts %}
+            {% for post in posts %}
+            <div class="card-wrapper">
+                <div class="card">
+                    {% if post.image_url %}
+                        <!-- <img class="card-img" src="{{ post.image_url }}" alt="{{ post.title }}" loading="lazy"> -->
+                    {% endif %}
+                    <div class="card-content">
+                        <h2 class="card-title">{{ post.title }}</h2>
+                        <p class="card-text">{{ post.content|truncatewords:20 }}</p>
+                        <small class="card-date">Published on {{ post.created_at|slice:":10" }}</small>
+                        
+                        <!-- Action icons -->
+                         <div class="card-actions mt-2 d-flex gap-2">
+                           <!-- View Post -->
+                            <a href="{% url 'postDetail' post.id %}" title="View Post" class="btn btn-outline-dark btn-sm rounded-circle">
+                                <i class="fa fa-eye"></i>
+                            </a>
+                            <!-- Edit Post -->
+                            <a href="{% url 'editPost' post.id %}" title="Edit Post" class="btn btn-outline-dark btn-sm rounded-circle">
+                                <i class="fa fa-edit"></i>
+                            </a>
+                            <!-- Delete Post -->
+                            <form method="POST" action="{% url 'deletePost' post.id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-circle" 
+                                        title="Delete Post"
+                                        onclick="return confirm('Are you sure you want to delete this post?');">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>                       
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
+
+<!-- Optional: Include Font Awesome if not already included -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+{% endblock %}

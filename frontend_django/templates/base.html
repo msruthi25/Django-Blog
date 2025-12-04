@@ -1,0 +1,169 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}My Blog{% endblock %}</title>    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <script src="{% static 'js/auth.js' %}"></script>
+</head>
+<body>
+<div class="main-content">
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-container">
+            <div class="logo-title">
+                <div class="logo">
+                    <a href="/">
+                        <img src="data:image/png;base64,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" alt="My Blog Logo">
+                    </a>
+                </div>
+                <h1 class="site-title">My Tech Blog</h1>
+            </div>
+            <nav class="site-nav">    
+                {% if request.COOKIES.access_token  %}                    
+                        <ul class="navbar-nav d-flex flex-row gap-3">
+                            <li class="nav-item">
+                            <a class="nav-link" href="{% url 'createPostView' %}">Write Post</a>
+                            </li>
+                            <li class="nav-item"> 
+                            <a class="nav-link" href="{% url 'comments' %}" data-method="GET">Your Comments</a>
+                            </li>
+                            <li class="nav-item">
+                            <a class="nav-link auth-link" href="{% url 'userPosts' %}"  data-method="GET">Your Posts</a>
+                            </li>
+                            <li class="nav-item">
+                            <a class="nav-link" href="{% url 'posts' %}">All Posts</a>
+                            </li>
+                        </ul>                    
+                {% endif %}        
+            </nav>
+            <nav class="site-nav">                
+                    {% if request.COOKIES.access_token %}            
+                        <!-- USER LOGGED IN -->
+                        <span class="welcome-text me-3 text-white">
+                            Welcome, {{ request.COOKIES.username }} 👋
+                        </span>
+
+                        <a href="{% url 'logout' %}" class="btn btn-outline-light">
+                            Logout
+                        </a>
+                    {% else %}
+                        <button type="button" class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#loginModal">
+                            Login
+                        </button>
+
+                        <!-- Login Modal -->
+                        <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content p-4 rounded-4 shadow-lg">                                 
+                                    <div class="modal-header border-0 justify-content-center pb-1">
+                                        <h5 class="modal-title fw-bold">Login</h5>
+                                        <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>              
+
+                                    <div class="modal-body pt-1">
+                                        <form method="POST" action="{% url 'login' %}">
+                                            {% csrf_token %}
+
+                                            <div class="mb-3">
+                                                <label for="email" class="form-label">Email</label>
+                                                <input type="email" class="form-control rounded-pill" id="email" name="email" placeholder="Enter email" required>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label for="password" class="form-label">Password</label>
+                                                <input type="password" class="form-control rounded-pill" id="password" name="password" placeholder="Enter password" required>
+                                            </div>
+
+                                            <div class="d-grid">
+                                                <button type="submit" class="btn btn-dark rounded-pill">Login</button>
+                                            </div>
+                                        </form>
+                                    </div>                
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn btn-outline-light ms-4" data-bs-toggle="modal" data-bs-target="#signupModal">
+                            Create Account
+                        </button>
+
+                        <!-- Signup Modal -->
+                        <div class="modal fade" id="signupModal" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content p-4 rounded-4 shadow-lg">
+
+                                    <div class="modal-header border-0 justify-content-center pb-1">
+                                        <h5 class="modal-title fw-bold">Create Account</h5>
+                                        <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal"></button>
+                                    </div>
+
+                                    <div class="modal-body pt-1">
+                                        <form method="POST" action="{% url 'createUser' %}">
+                                            {% csrf_token %}
+
+                                            <div class="mb-3">
+                                                <label for="username" class="form-label">Username</label>
+                                                <input type="text" class="form-control rounded-pill" id="username" name="username" placeholder="Enter username" required>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label for="email_signup" class="form-label">Email</label>
+                                                <input type="email" class="form-control rounded-pill" id="email_signup" name="email" placeholder="Enter email" required>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label for="password_signup" class="form-label">Password</label>
+                                                <input type="password" class="form-control rounded-pill" id="password_signup" name="password" placeholder="Enter password" required>
+                                            </div>
+
+                                            <div class="d-grid">
+                                                <button type="submit" class="btn btn-dark rounded-pill">Create Account</button>
+                                            </div>
+
+                                        </form>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    {% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <!-- CONTENT -->
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+</div>
+<!-- FOOTER -->
+<footer class="site-footer">
+    <div class="footer-container">
+        <p>&copy; 2025 My Awesome Blog. All rights reserved.</p>
+        <div class="footer-links">
+            <a href="/about/">About</a>
+            <a href="/contact/">Contact</a>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>

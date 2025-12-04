@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% if request.COOKIES.access_token %}
+        <div class="container my-5" style="max-width: 50%;">
+            <h2 class="mb-4 text-center">Create a New Post</h2>
+
+            <form method="POST" action="{% url 'createPost' %}">
+                {% csrf_token %}
+
+                <!-- Title -->
+                <div class="mb-3">
+                    <label for="title" class="form-label fw-bold">Title</label>
+                    <input type="text" class="form-control rounded-pill" id="title" name="title" placeholder="Enter post title" required>
+                </div>
+
+                <!-- Content -->
+                <div class="mb-3">
+                    <label for="content" class="form-label fw-bold">Content</label>
+                    <textarea class="form-control rounded" id="content" name="content" rows="6" placeholder="Write your post here..." required></textarea>
+                </div>
+
+                <!-- Image URL -->
+                <div class="mb-3">
+                    <label for="image_url" class="form-label fw-bold">Image URL</label>
+                    <input type="url" class="form-control rounded-pill" id="image_url" name="image_url" placeholder="Optional image URL">
+                </div>
+
+                <!-- Submit -->
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-dark rounded-pill">Create Post</button>
+                </div>
+            </form>
+        </div>
+    {% else %}
+        <div class="alert alert-danger text-center py-3" role="alert">
+            ❌ Cannot access this page
+        </div>
+    {% endif %}
+{% endblock %}

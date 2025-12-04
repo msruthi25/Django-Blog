@@ -1,3 +1,4 @@
+from urllib import response
 import jwt
 from django.conf import settings
 from datetime import datetime, timedelta
@@ -7,7 +8,7 @@ from account.models import User
 def token_generation(account):
     payload = {
     "user_id": account.id,
-    "exp": datetime.utcnow() + timedelta(minutes=settings.JWT_EXPIRY_MINUTES)
+    "exp": datetime.utcnow() + timedelta(minutes=settings.JWT_EXPIRY_MINUTES) 
     }
     token = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
     return token
@@ -22,13 +23,13 @@ def token_validation(token):
             raise AuthenticationFailed("User not found")
         return payload
     except jwt.ExpiredSignatureError:
-        raise AuthenticationFailed("Token has expired")
+        raise AuthenticationFailed("token_expired")
     except jwt.InvalidTokenError:
         raise AuthenticationFailed("Invalid token")
     
     
 def get_user_from_request(request):    
-    token = request.headers.get("Authorization")
+    token = request.COOKIES.get("access_token")
     if not token:
         raise AuthenticationFailed("Authorization header required")
     if " " in token:

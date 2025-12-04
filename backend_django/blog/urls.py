@@ -2,11 +2,25 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('',views.AllPosts.as_view(),name='posts'),
-    path('posts',views.AllPosts.as_view(),name='posts'),
-    path('post/<int:id>',views.PostByID.as_view(),name='postDetail'),
-    path('userPost',views.UserPosts.as_view(), name='UserPost'),
-    path('userPost/<int:id>',views.UserPosts.as_view(), name='UserPost'),
-    path('comments/<int:id>',views.Comments.as_view(), name='Comment'),
-    path('comments',views.Comments.as_view(), name='Comment')
+    # Home / All Posts
+    path('', views.AllPosts.as_view(), name='posts'),
+    path('posts/', views.AllPosts.as_view(), name='posts'),
+    path('createPost/', views.createPostView.as_view(),name='createPostView'),
+
+    # Post Detail
+    path('post/<int:id>/', views.PostByID.as_view(), name='postDetail'),
+
+    # User Posts
+    path('user/posts/', views.get_user_posts, name='userPosts'),       # GET all posts of logged-in user
+    path('user/posts/create/', views.create_post, name='createPost'),       # POST to create a post
+    path('user/posts/<int:id>/', views.view_post, name='userPostDetail'),  # GET single post
+    path('user/posts/edit/<int:id>', views.update_post, name='editPost'), # POST to update a post
+    path('user/posts/delete/<int:id>', views.delete_post, name='deletePost'), # POST to delete a post
+
+    # Comments
+    path('comments/', views.get_user_comments, name='comments'),                 # GET all comments
+    path('comments/create/<int:id>', views.create_comment, name='createComment'),   # POST new comment
+    path('comments/<int:id>/', views.view_comment, name='commentDetail'),   # GET single comment
+    path('comments/<int:id>/edit/', views.update_comment, name='editComment'), # POST to update comment
+    path('comments/<int:id>/delete/', views.delete_comment, name='deleteComment')  # GET/PUT/DELETE single comment
 ]
