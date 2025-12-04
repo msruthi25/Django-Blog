@@ -1,0 +1,13 @@
+# Treat all Python files as Python
+*.py linguist-language=Python
+
+# HTML templates
+frontend_django/templates/* linguist-language=HTML
+
+# CSS & JS
+frontend_django/static/css/* linguist-language=CSS
+frontend_django/static/js/* linguist-language=JavaScript
+
+# Exclude static/template folders from language stats
+frontend_django/templates/* linguist-vendored
+frontend_django/static/* linguist-vendored

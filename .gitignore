@@ -1,25 +1,32 @@
 # Python
 __pycache__/
 *.py[cod]
-*.egg-info/
+*.pyo
+*.pyd
+*.pyc
 
-# Django
-db.sqlite3
-db_backup.sqlite3 
-*.log
-media/
-staticfiles/
-
-# Virtual environment
-venv/
-env/
-
-# Environment variables
+# Env
 .env
 
-# IDE/editor
+
+# Django
+*.sqlite3
+db.sqlite3
+/staticfiles/
+media/
+
+# IDEs
 .vscode/
 .idea/
-
-# OS files
+*.swp
 .DS_Store
+
+# Logs
+*.log
+
+# Byte-compiled / temp files
+*.pyc
+*.pyo
+*.pyd
+*.cache
+*.pytest_cache/
