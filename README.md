@@ -49,9 +49,14 @@ templates, and user-specific content management.
 
 ## 🗂️ Project Structure
 Django_Blog
+│
+├── .gitattributes
+├── .gitignore
 ├── README.md
-├── backend_django                    # BackEnd
-│   ├── account
+│
+├── backend_django        # Backend (Django project + apps)
+│   │
+│   ├── account           # User account app
 │   │   ├── __init__.py
 │   │   ├── admin.py
 │   │   ├── apps.py
@@ -62,13 +67,15 @@ Django_Blog
 │   │   ├── tests.py
 │   │   ├── urls.py
 │   │   └── views.py
-│   ├── backend_django                # Project Settings Package
+│   │
+│   ├── backend_django    # Project folder
 │   │   ├── __init__.py
 │   │   ├── asgi.py
 │   │   ├── settings.py
 │   │   ├── urls.py
 │   │   └── wsgi.py
-│   ├── blog
+│   │
+│   ├── blog              # Blog app
 │   │   ├── __init__.py
 │   │   ├── admin.py
 │   │   ├── apps.py
@@ -78,16 +85,19 @@ Django_Blog
 │   │   ├── tests.py
 │   │   ├── urls.py
 │   │   └── views.py
+│   │
 │   ├── db.sqlite3
 │   ├── manage.py
 │   └── requirements.txt
 │
-├── frontend_django                   # FrontEnd
+├── frontend_django       # Frontend (templates + static)
+│   │
 │   ├── static
 │   │   ├── css
 │   │   │   └── styles.css
 │   │   └── js
 │   │       └── auth.js
+│   │
 │   └── templates
 │       ├── base.html
 │       ├── edit_post.html
@@ -96,9 +106,6 @@ Django_Blog
 │       ├── userComments.html
 │       ├── userPost.html
 │       └── write_post.html
-│
-├── .gitignore
-└── README.md
 
 ------------------------------------------------------------------------
 
