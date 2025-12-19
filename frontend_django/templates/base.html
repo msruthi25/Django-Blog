@@ -10,7 +10,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <script src="{% static 'js/auth.js' %}"></script>
 </head>
 <body>
 <div class="main-content">
@@ -26,7 +25,7 @@
                 <h1 class="site-title">My Tech Blog</h1>
             </div>
             <nav class="site-nav">    
-                {% if request.COOKIES.access_token  %}                    
+                {% if request.user.is_authenticated %}                   
                         <ul class="navbar-nav d-flex flex-row gap-3">
                             <li class="nav-item">
                             <a class="nav-link" href="{% url 'createPostView' %}">Write Post</a>
@@ -43,11 +42,11 @@
                         </ul>                    
                 {% endif %}        
             </nav>
-            <nav class="site-nav">                
-                    {% if request.COOKIES.access_token %}            
+            <nav class="site-nav">                                   
+                    {% if request.user.is_authenticated %}          
                         <!-- USER LOGGED IN -->
                         <span class="welcome-text me-3 text-white">
-                            Welcome, {{ request.COOKIES.username }} 👋
+                            Welcome, {{ request.user.username }} 👋
                         </span>
 
                         <a href="{% url 'logout' %}" class="btn btn-outline-light">
@@ -72,8 +71,8 @@
                                             {% csrf_token %}
 
                                             <div class="mb-3">
-                                                <label for="email" class="form-label">Email</label>
-                                                <input type="email" class="form-control rounded-pill" id="email" name="email" placeholder="Enter email" required>
+                                                <label for="username" class="form-label">Username</label>
+                                                <input type="text" class="form-control rounded-pill" id="username" name="username" placeholder="Enter Username" required>
                                             </div>
 
                                             <div class="mb-3">
