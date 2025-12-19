@@ -1,159 +1,140 @@
-from datetime import timezone
-from django.http import QueryDict
+from django.http import HttpResponseNotAllowed
 from django.shortcuts import get_object_or_404, redirect, render
 from blog.models import Post, Comment
 from blog.serializers import PostSerializer,CommentSerializer
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework.exceptions import NotFound, ValidationError, PermissionDenied,AuthenticationFailed
-from rest_framework import status
-from account.auth_utils import get_user_from_request
-from account.models import User
 from django.contrib import messages
-from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404
 
-class AllPosts(APIView):  #Display All posts
-    def get(self,request):        
-        all_posts = Post.objects.all()
-        if not all_posts.exists():
-            raise NotFound("No posts Found")
-        serialized = PostSerializer(all_posts, many=True)          
-        return render(request, "home.html", {"posts": serialized.data}, status=status.HTTP_200_OK)
+def allPosts(request):     #Display All posts    
+        all_posts = Post.objects.all()                
+        return render(request, "home.html", {"posts": all_posts})
      
-class PostByID(APIView):
-    def get(self, request, id):
-        post = Post.objects.filter(id=id).first()
-        if not post:
-            raise NotFound("Post Not Found")
-        serialized_post = PostSerializer(post)
-        comments = Comment.objects.filter(post_id=post.id).order_by('-created_at')        
+def postByID(request, id):
+        post = get_object_or_404(Post, id=id)
+        comments = Comment.objects.filter(post=post).order_by("-created_at")
+
         return render(
             request,
             "post_detail.html",
             {
-                "post_detail": serialized_post.data,
+                "post_detail": post,
                 "author_name": post.author.username,
-                "comments": comments
-            },
-            status=status.HTTP_200_OK
-        )
+                "comments": comments,
+            }
 
-class createPostView(APIView):
-    def get(self,request):        
+        )
+def createPostView(request):        
         return render(request, "write_post.html")
 
 #User Posts
+@login_required(login_url="login")
 def get_user_posts(request):  #Get all posts of Logged In Users
-    try:
-       user_id = get_user_from_request(request)
-    except AuthenticationFailed as e:
-        return JsonResponse({"error": str(e)}, status=401)  
-    posts = Post.objects.filter(author_id=user_id)
+    posts = Post.objects.filter(author=request.user)
     if not posts.exists():
         messages.warning(request, "No posts found")
     return render(request, "userPost.html", {"posts": posts})
 
-def create_post(request):        #Create Posts
-    try:
-       user_id = get_user_from_request(request)
-    except AuthenticationFailed as e:
-        return JsonResponse({"error": str(e)}, status=401)  
+@login_required(login_url="login")
+def create_post(request):
     if request.method == "POST":
-        title = request.POST.get("title")
-        content = request.POST.get("content")
-        image_url = request.POST.get("image_url")
-        Post.objects.create(title=title, content=content, author_id=user_id, image_url=image_url, published=True)
-        messages.success(request, "Post created successfully")
-        return redirect("userPosts")
+        serializer = PostSerializer(data=request.POST)
+        if serializer.is_valid():
+            serializer.save(author=request.user, published=True)
+            messages.success(request, "Post created successfully")
+            return redirect("userPosts")
+        else:
+            for field, errors in serializer.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
+            return render(request, "write_post.html", {"data": request.POST})
+
     return render(request, "write_post.html")
 
-def view_post(request, id):   #View posts by PostID
+@login_required(login_url="login")
+def update_post(request, id):
     post = get_object_or_404(Post, id=id)
-    return render(request, "post_detail.html", {"post": post})
-
-def update_post(request, id):  #Update Posts
-    try:
-       user_id = get_user_from_request(request)
-    except AuthenticationFailed as e:
-        return JsonResponse({"error": str(e)}, status=401)  
-    post = get_object_or_404(Post, id=id)
-    if post.author_id != user_id:
+    if post.author_id != request.user.id:
         messages.error(request, "You cannot edit this post")
         return redirect("userPosts")
+
     if request.method == "POST":
-        post.title = request.POST.get("title")
-        post.content = request.POST.get("content")
-        post.image_url = request.POST.get("image_url")
-        post.save()
-        messages.success(request, "Post updated successfully")
-        return redirect("userPosts")    
+        serializer = PostSerializer(instance=post, data=request.POST, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            messages.success(request, "Post updated successfully")
+            return redirect("userPosts")
+        else:
+            for field, errors in serializer.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
+            return render(request, "edit_post.html", {"post": post, "data": request.POST})
+
     return render(request, "edit_post.html", {"post": post})
 
-def delete_post(request, id):  #Delete posts
-    try:
-       user_id = get_user_from_request(request)
-    except AuthenticationFailed as e:
-        return JsonResponse({"error": str(e)}, status=401)  
+@login_required(login_url="login")
+def delete_post(request, id):
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
     post = get_object_or_404(Post, id=id)
-    if post.author_id != user_id:
-        messages.error(request, "You cannot delete this post")
+    if post.author_id != request.user.id:
+        messages.error(request, "You are not allowed to delete this post.")
         return redirect("userPosts")
-    if request.method == "POST":
-        post.delete()
-        messages.success(request, "Post deleted successfully")
-        return redirect("userPosts")    
-    return render(request, {"post": post})
+    post.delete()
+    messages.success(request, "Post deleted successfully.")
+    return redirect("userPosts")
+
         
 # --- COMMENTS ---
 
+@login_required(login_url="login")
 def get_user_comments(request):  #Get Comments by userId
-    try:
-       user_id = get_user_from_request(request)
-    except AuthenticationFailed as e:
-        return JsonResponse({"error": str(e)}, status=401)
-    comments = Comment.objects.filter(author_id=user_id)
+    comments = Comment.objects.filter(author_id=request.user.id)
     if not comments.exists():
         messages.warning(request, "No comments found")
     return render(request, "userComments.html", {"comments": comments})
 
-def create_comment(request,id):  #Create Comment
-    try:
-       user_id = get_user_from_request(request)
-    except AuthenticationFailed as e:
-        return JsonResponse({"error": str(e)}, status=401)  
+@login_required(login_url="login")
+def create_comment(request, id):
     if request.method == "POST":
-        content = request.POST.get("content")
-        Comment.objects.create(author_id=user_id, post_id=id, content=content)
-        messages.success(request, "Comment created successfully")
-        return redirect("comments")
-
+        serializer = CommentSerializer(data=request.POST)
+        if serializer.is_valid():
+            serializer.save(author_id=request.user.id, post_id=id)
+            messages.success(request, "Comment created successfully")
+            return redirect("comments")
+        else:
+            for field, errors in serializer.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
+            return redirect("comments")
+        
 def view_comment(request, id):     #View User Comments 
     comment = get_object_or_404(Comment, id=id)
     return render(request, "comment_detail.html", {"comment": comment})
 
-def update_comment(request, id): #Update Comments
-    try:
-       user_id = get_user_from_request(request)
-    except AuthenticationFailed as e:
-        return JsonResponse({"error": str(e)}, status=401)  
+@login_required(login_url="login")
+def update_comment(request, id):
     comment = get_object_or_404(Comment, id=id)
-    if comment.author_id != user_id:
+    if comment.author_id != request.user.id:
         messages.error(request, "You cannot edit this comment")
         return redirect("comments")
     if request.method == "POST":
-        comment.content = request.POST.get("content")
-        comment.save()
-        messages.success(request, "Comment updated successfully")
-        return redirect("comments")    
+        serializer = CommentSerializer(instance=comment, data=request.POST, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            messages.success(request, "Comment updated successfully")
+            return redirect("comments")
+        else:
+            for field, errors in serializer.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
+            return redirect("comments")
     return redirect("comments")
 
+@login_required(login_url="login")
 def delete_comment(request, id):  #Delete comments
-    try:
-       user_id = get_user_from_request(request)
-    except AuthenticationFailed as e:
-        return JsonResponse({"error": str(e)}, status=401)  
     comment = get_object_or_404(Comment, id=id)
-    if comment.author_id != user_id:
+    if comment.author_id != request.user.id:
         messages.error(request, "You cannot delete this comment")
         return redirect("comments")
     if request.method == "POST":

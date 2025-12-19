@@ -29,7 +29,7 @@ SECRET_KEY= env('SECRET_KEY')
 DEBUG = env('DEBUG')
 JWT_EXPIRY_MINUTES = env.int('JWT_EXPIRY_MINUTES', default=30)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS =  ['localhost', '127.0.0.1']
 
 
 # Application definition
@@ -118,6 +118,7 @@ USE_I18N = True
 
 USE_TZ = True
 
+AUTH_USER_MODEL = 'account.User'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/

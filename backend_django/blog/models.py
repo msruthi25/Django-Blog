@@ -17,5 +17,5 @@ class Comment(models.Model):
     post= models.ForeignKey(Post,on_delete=models.CASCADE,  db_column='post_id')
     author  = models.ForeignKey(User,on_delete=models.CASCADE , db_column='author_id')
     content   = models.TextField(null=True)
-    created_at = models.DateTimeField(default=datetime.now())
+    created_at = models.DateTimeField(auto_now_add=True)
 
