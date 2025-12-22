@@ -1,55 +1,87 @@
 from django.http import HttpResponseNotAllowed
 from django.shortcuts import get_object_or_404, redirect, render
-from blog.models import Post, Comment
-from blog.serializers import PostSerializer,CommentSerializer
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404
+from asgiref.sync import sync_to_async
+from django.template.response import TemplateResponse
+from backend_django.blog.models import Post, Comment
+from backend_django.blog.serializers import PostSerializer, CommentSerializer
 
-def allPosts(request):     #Display All posts    
-        all_posts = Post.objects.all()                
-        return render(request, "home.html", {"posts": all_posts})
-     
-def postByID(request, id):
-        post = get_object_or_404(Post, id=id)
-        comments = Comment.objects.filter(post=post).order_by("-created_at")
+# ---------------- POSTS ----------------
 
-        return render(
-            request,
-            "post_detail.html",
-            {
-                "post_detail": post,
-                "author_name": post.author.username,
-                "comments": comments,
-            }
+@sync_to_async
+def get_all_posts_query():
+    return list(Post.objects.all())
 
-        )
-def createPostView(request):        
-        return render(request, "write_post.html")
+@sync_to_async
+def get_post(id):
+    return get_object_or_404(Post, id=id)
 
-#User Posts
+@sync_to_async
+def get_user_posts_query(user):
+    return list(Post.objects.filter(author=user))
+
+@sync_to_async
+def save_post(serializer, user):
+    serializer.save(author=user, published=True)
+
+@sync_to_async
+def get_post_author_username(post):
+    return post.author.username
+
+# ---------------- COMMENTS ----------------
+
+@sync_to_async
+def get_user_comments_query(user):
+    return list(Comment.objects.filter(author=user))
+
+# ---------------- VIEWS ----------------
+
+# Home / All Posts
+async def allPosts(request):
+    all_posts = await get_all_posts_query()
+    return TemplateResponse(request, "home.html", {"posts": all_posts})
+
+# Render form for creating post (GET)
+async def createPostView(request):
+    return TemplateResponse(request, "write_post.html")
+
+# Post Detail
+async def postByID(request, id):
+    post = await get_post(id)
+    comments = await sync_to_async(list)(Comment.objects.filter(post=post).order_by("-created_at"))
+    author_name = await get_post_author_username(post)
+    return TemplateResponse(
+        request,
+        "post_detail.html",
+        {"post_detail": post, "author_name": author_name, "comments": comments},
+    )
+
+# User Posts
 @login_required(login_url="login")
-def get_user_posts(request):  #Get all posts of Logged In Users
-    posts = Post.objects.filter(author=request.user)
-    if not posts.exists():
+async def get_user_posts(request):
+    user = await sync_to_async(lambda u: u)(request.user)
+    posts = await get_user_posts_query(user)
+    if not posts:
         messages.warning(request, "No posts found")
-    return render(request, "userPost.html", {"posts": posts})
+    return TemplateResponse(request, "userPost.html", {"posts": posts})
 
 @login_required(login_url="login")
-def create_post(request):
+async def create_post(request):
+    user = await sync_to_async(lambda u: u)(request.user)
     if request.method == "POST":
         serializer = PostSerializer(data=request.POST)
-        if serializer.is_valid():
-            serializer.save(author=request.user, published=True)
+        is_valid = await sync_to_async(serializer.is_valid, thread_sensitive=True)()
+        if is_valid:
+            await save_post(serializer, user)
             messages.success(request, "Post created successfully")
             return redirect("userPosts")
         else:
             for field, errors in serializer.errors.items():
                 for error in errors:
                     messages.error(request, f"{field}: {error}")
-            return render(request, "write_post.html", {"data": request.POST})
-
-    return render(request, "write_post.html")
+            return TemplateResponse(request, "write_post.html", {"data": request.POST})
+    return TemplateResponse(request, "write_post.html")
 
 @login_required(login_url="login")
 def update_post(request, id):
@@ -69,7 +101,6 @@ def update_post(request, id):
                 for error in errors:
                     messages.error(request, f"{field}: {error}")
             return render(request, "edit_post.html", {"post": post, "data": request.POST})
-
     return render(request, "edit_post.html", {"post": post})
 
 @login_required(login_url="login")
@@ -84,15 +115,16 @@ def delete_post(request, id):
     messages.success(request, "Post deleted successfully.")
     return redirect("userPosts")
 
-        
-# --- COMMENTS ---
+# ---------------- COMMENTS ----------------
 
 @login_required(login_url="login")
-def get_user_comments(request):  #Get Comments by userId
-    comments = Comment.objects.filter(author_id=request.user.id)
-    if not comments.exists():
+async def get_user_comments(request):
+    user = await sync_to_async(lambda u: u)(request.user)
+    comments = await get_user_comments_query(user)
+    if not comments:
         messages.warning(request, "No comments found")
-    return render(request, "userComments.html", {"comments": comments})
+    return TemplateResponse(request, "userComments.html", {"comments": comments})
+
 
 @login_required(login_url="login")
 def create_comment(request, id):
@@ -107,10 +139,11 @@ def create_comment(request, id):
                 for error in errors:
                     messages.error(request, f"{field}: {error}")
             return redirect("comments")
-        
-def view_comment(request, id):     #View User Comments 
-    comment = get_object_or_404(Comment, id=id)
-    return render(request, "comment_detail.html", {"comment": comment})
+
+
+async def view_comment(request, id):
+    comment = await sync_to_async(get_object_or_404)(Comment, id=id)
+    return TemplateResponse(request, "comment_detail.html", {"comment": comment})
 
 @login_required(login_url="login")
 def update_comment(request, id):
@@ -141,4 +174,4 @@ def delete_comment(request, id):  #Delete comments
         comment.delete()
         messages.success(request, "Comment deleted successfully")
         return redirect("comments")    
-    return redirect("comments")
+    return redirect("comments") 

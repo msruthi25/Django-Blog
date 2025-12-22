@@ -2,24 +2,25 @@ from rest_framework.views import APIView
 from django.shortcuts import redirect
 from django.contrib import messages
 from django.contrib.auth import login, logout
-from account.serializers import UserCreateSerializer, UserLoginSerializer
-
+from backend_django.account.serializers import UserCreateSerializer, UserLoginSerializer
+from .tasks import welcome_task
 
 class CreateUser(APIView):
     def post(self, request):
         serializer = UserCreateSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            user=serializer.save()
+            welcome_task.delay(user.username)
             messages.success(
                 request,
                 "Account created successfully! Please login."
             )
-            return redirect("login")
+            return redirect("posts")
 
         for field, errors in serializer.errors.items():
             for error in errors:
                 messages.error(request, f"{field}: {error}")
-        return redirect("register")
+        return redirect("posts")
 
 
 class Login(APIView):
@@ -34,7 +35,7 @@ class Login(APIView):
         for field, errors in serializer.errors.items():
             for error in errors:
                 messages.error(request, f"{field}: {error}")
-        return redirect("login")
+        return redirect("posts")
 
 
 class Logout(APIView):

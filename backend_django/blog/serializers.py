@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from blog.models import Post, Comment
+from backend_django.blog.models import Post, Comment
 
 class PostSerializer(serializers.ModelSerializer):
     author = serializers.PrimaryKeyRelatedField(read_only=True)

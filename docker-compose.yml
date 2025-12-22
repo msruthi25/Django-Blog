@@ -1,0 +1,22 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - DJANGO_SETTINGS_MODULE=backend_django.settings
+      - SECRET_KEY=django-insecure-!4_6$-609!tze3t&(f+)a!)8@!k$*1v+zby4d8)9unu)fnew0t
+      - db_name=/app/backend_django/db.sqlite3
+      - DEBUG=True
+      - JWT_EXPIRY_HOURS=30
+    volumes:
+      - ./backend_django/db.sqlite3:/app/backend_django/db.sqlite3  
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from blog.models import Post, Comment
+from backend_django.blog.models import Post, Comment
 
 
 admin.site.register(Post)

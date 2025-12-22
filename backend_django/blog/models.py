@@ -1,5 +1,5 @@
 from django.db import models
-from account.models import User
+from backend_django.account.models import User
 from datetime import datetime
 
 class Post(models.Model):

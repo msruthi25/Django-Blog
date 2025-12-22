@@ -29,7 +29,7 @@ SECRET_KEY= env('SECRET_KEY')
 DEBUG = env('DEBUG')
 JWT_EXPIRY_MINUTES = env.int('JWT_EXPIRY_MINUTES', default=30)
 
-ALLOWED_HOSTS =  ['localhost', '127.0.0.1']
+ALLOWED_HOSTS =  ['*', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -38,18 +38,20 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
+    'django_celery_results',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken', 
-    'blog',
-    'account'
+    'backend_django.blog',
+    'backend_django.account'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -62,7 +64,7 @@ ROOT_URLCONF = 'backend_django.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, '..', 'frontend_django', 'templates')],
+        'DIRS': ['/app/frontend_django/templates'], 
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -83,7 +85,7 @@ WSGI_APPLICATION = 'backend_django.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / env('db_name'),
+         'NAME': '/app/backend_django/db.sqlite3',
     }
 }
 
@@ -122,12 +124,13 @@ AUTH_USER_MODEL = 'account.User'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
-STATIC_URL = 'static/'  # URL prefix for static files
+STATIC_URL = '/static/'  # URL prefix for static files
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, '..', 'frontend_django', 'static'),  # filesystem location
+    '/app/frontend_django/static',  # absolute path inside container
 ]
 
 
@@ -145,3 +148,12 @@ MESSAGE_TAGS = {
     messages.WARNING: 'warning',
     messages.ERROR: 'danger',
 }
+
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+
+
+
+
